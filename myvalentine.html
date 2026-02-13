@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#ff4d6d">
+<title>Solo Per la Funghetta</title>
+
+<link href="https://fonts.cdnfonts.com/css/minecraft-4" rel="stylesheet">
+
+<style>
+body {
+    margin: 0;
+    overflow: hidden;
+    background: linear-gradient(135deg, #ff9ecf, #ff4d6d);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100dvh; /* viewport dinamico mobile */
+    width: 100vw;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    cursor: url('https://cdn.cursors-4u.net/previews/minecraft-diamond-picaxe-04b00f28-32.webp') 32 32, auto;
+}
+
+/* ===== TITOLO SOPRA IL BLOCCO ===== */
+#mainTitle {
+    font-family: 'Minecraft', sans-serif;
+    font-size: clamp(22px, 5vw, 40px);
+    color: white;
+    margin-bottom: 25px;
+    text-align: center;
+    transition: opacity 0.6s ease;
+    padding: 0 15px;
+}
+
+
+#mainTitle.hide {
+    opacity: 0;
+}
+
+
+/* Cuori animati */
+.heart {
+    position: absolute;
+    color: rgba(255,255,255,0.6);
+    font-size: 20px;
+    animation: floatUp 6s linear infinite;
+}
+
+@keyframes floatUp {
+    0% { transform: translateY(100vh); opacity: 0; }
+    10% { opacity: 1; }
+    100% { transform: translateY(-10vh); opacity: 0; }
+}
+
+/* Blocco d'oro */
+#goldBlock {
+    width: min(60vw, 220px);
+    height: min(60vw, 220px);
+    aspect-ratio: 1/1;
+    background: linear-gradient(145deg, #FFD700, #E6B800);
+    border: 8px solid #B8860B;
+    box-shadow: inset 0 0 20px rgba(255,255,255,0.4),
+                inset -10px -10px 20px rgba(0,0,0,0.3);
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.1s;
+}
+
+
+/* Overlay crack PNG */
+#crackOverlay {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: url("crakc.webp") center/cover no-repeat;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.1s linear;
+}
+
+/* Shake mining */
+.breaking {
+    animation: shake 0.15s infinite;
+}
+
+@keyframes shake {
+    0% { transform: translate(1px,1px); }
+    25% { transform: translate(-2px,1px); }
+    50% { transform: translate(2px,-1px); }
+    75% { transform: translate(-1px,-2px); }
+    100% { transform: translate(1px,2px); }
+}
+
+/* Buco finale */
+#hole {
+    position: absolute;
+    width: min(80vw, 320px);
+    height: min(80vw, 320px);
+    background: white;
+    border-radius: 50%;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    z-index: 5;
+    box-shadow: 0 0 40px rgba(0,0,0,0.4);
+    padding: 20px;
+}
+
+
+/* Scritta finale enorme */
+#valentineText {
+    font-family: 'Minecraft', sans-serif;
+    font-size: clamp(26px, 6vw, 35px);
+    color: #ff2e63;
+    text-align: center;
+    padding: 0 15px;
+}
+
+
+#hole span {
+    font-size: 70px;
+    margin-bottom: 15px;
+}
+
+/* ===== START SCREEN ===== */
+#startScreen {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(135deg, #ff4d6d, #ff9ecf);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    cursor: pointer;
+}
+
+#startText {
+    font-family: 'Minecraft', sans-serif;
+    font-size: 50px;
+    color: white;
+    text-align: center;
+    animation: pulse 1.5s infinite;
+    text-shadow:
+        -3px -3px 0 #ff0000,
+         3px -3px 0 #ff0000,
+        -3px  3px 0 #ff0000,
+         3px  3px 0 #ff0000;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="startScreen">
+    <div id="startText">TAP TO START ❤️</div>
+</div>
+
+<div id="mainTitle">Break the Block 💎</div>
+
+<div id="goldBlock">
+    <div id="crackOverlay"></div>
+</div>
+
+<div id="hole">
+    <span>❤️</span>
+    <div id="valentineText">BE MY VALENTINE VERONICA!</div>
+</div>
+
+<audio id="bgMusic" autoplay loop muted>
+    <source src="song.mp3" type="audio/mpeg">
+</audio>
+
+
+<script>
+const music = document.getElementById("bgMusic");
+const title = document.getElementById("mainTitle");
+const block = document.getElementById("goldBlock");
+const crack = document.getElementById("crackOverlay");
+const hole = document.getElementById("hole");
+
+let holdTime = 0;
+let interval;
+const totalTime = 3000;
+
+function startBreaking() {
+    holdTime = 0;
+    block.classList.add("breaking");
+
+    interval = setInterval(() => {
+        holdTime += 100;
+        crack.style.opacity = holdTime / totalTime;
+
+       if (holdTime >= totalTime) {
+    clearInterval(interval);
+    block.style.display = "none";
+    hole.style.display = "flex";
+    title.classList.add("hide"); // ← FA SPARIRE IL TITOLO
+}
+
+
+    }, 100);
+}
+
+function stopBreaking() {
+    clearInterval(interval);
+    block.classList.remove("breaking");
+    crack.style.opacity = 0;
+    holdTime = 0;
+}
+
+// Evento universale (desktop + mobile)
+block.addEventListener("pointerdown", startBreaking);
+block.addEventListener("pointerup", stopBreaking);
+block.addEventListener("pointerleave", stopBreaking);
+block.addEventListener("pointercancel", stopBreaking);
+
+
+/* Cuori background */
+// Avvio immediato cuori + musica al caricamento
+const startScreen = document.getElementById("startScreen");
+
+let started = false;
+
+function startExperience() {
+
+    if (started) return;
+    started = true;
+
+    music.volume = 0.6;
+    music.muted = false;
+    music.play().catch(() => {});
+
+    setInterval(() => {
+        const heart = document.createElement("div");
+        heart.classList.add("heart");
+        heart.innerHTML = "❤";
+        heart.style.left = Math.random() * 100 + "vw";
+        heart.style.fontSize = (15 + Math.random() * 25) + "px";
+        heart.style.animationDuration = (4 + Math.random() * 3) + "s";
+        document.body.appendChild(heart);
+        setTimeout(() => heart.remove(), 6000);
+    }, 400);
+
+    startScreen.style.opacity = "0";
+    startScreen.style.transition = "opacity 0.6s ease";
+    setTimeout(() => startScreen.remove(), 600);
+}
+
+startScreen.addEventListener("pointerdown", startExperience);
+
+
+startScreen.addEventListener("click", startExperience);
+startScreen.addEventListener("touchstart", startExperience);
+
+
+</script>
+
+</body>
+</html>
